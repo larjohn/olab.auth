@@ -42,6 +42,7 @@ class Controller_Base extends Controller_Template {
     );
     private $learnerRules = array(
         array('controller' => 'authoredLabyrinth', 'action' => 'index', 'isFullController' => true),
+
         array('controller' => 'collectionManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'labyrinthManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'exportImportManager', 'action' => 'index', 'isFullController' => true),
