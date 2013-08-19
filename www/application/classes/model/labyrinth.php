@@ -134,13 +134,14 @@ class Model_Labyrinth extends Model {
 
     private function checkUser($mapId) {
         if (Auth::instance()->logged_in()) {
-            if (DB_ORM::model('map_user')->checkUserById($mapId, Auth::instance()->get_user()->id)) {
+            $map = DB_ORM::model('map', array((int) $mapId));
+            if (DB_ORM::model('map_user')->checkUserById($mapId, Auth::instance()->get_user()->id) && !$map->locked) {
                 return TRUE;
             }
 
-            $map = DB_ORM::model('map', array((int) $mapId));
+
             if ($map) {
-                if ($map->author_id == Auth::instance()->get_user()->id) {
+                if ($map->author_id == Auth::instance()->get_user()->id && !$map->locked) {
                     return TRUE;
                 }
                 if(Auth::instance()->get_user()->type->name == 'superuser')

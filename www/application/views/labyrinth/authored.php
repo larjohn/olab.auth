@@ -98,6 +98,7 @@
                                 <span class="visible-desktop">Play</span>
                             </a>
                         <?php } ?>
+                        <?php if(!$map->locked || Auth::instance()->get_user()->type->name == 'superuser'){ ?>
                         <a class="btn btn-info"
                            href="<?php echo URL::base() . 'labyrinthManager/global/' . $map->id; ?>">
                             <i class="icon-edit icon-white"></i>
@@ -107,7 +108,9 @@
                            href="#">
                             <i class="icon-th icon-white"></i>
                             Duplicate
-                        </a></div>
+                        </a>
+                        <?php } ?>
+                    </div>
                     <div class="modal hide fade in" id="duplicate_labyrinth<?php echo $map->id; ?>">
                         <div class="modal-header block">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>

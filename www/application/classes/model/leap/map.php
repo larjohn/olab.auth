@@ -119,6 +119,11 @@ class Model_Leap_Map extends DB_ORM_Model
                 'nullable' => FALSE,
                 'savable' => TRUE,
             )),
+            'locked' => new DB_ORM_Field_Boolean($this, array(
+                'default' => FALSE,
+                'nullable' => FALSE,
+                'savable' => TRUE,
+            )),
             'section_id' => new DB_ORM_Field_Integer($this, array(
                 'max_length' => 11,
                 'nullable' => FALSE,
@@ -502,6 +507,22 @@ class Model_Leap_Map extends DB_ORM_Model
         $this->load();
 
         $this->enabled = FALSE;
+        $this->save();
+    }
+    public function lock($id)
+    {
+        $this->id = $id;
+        $this->load();
+
+        $this->locked = TRUE;
+        $this->save();
+    }
+    public function unlock($id)
+    {
+        $this->id = $id;
+        $this->load();
+
+        $this->locked = FALSE;
         $this->save();
     }
 

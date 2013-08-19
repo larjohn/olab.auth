@@ -32,6 +32,14 @@ if (isset($templateData['map'])) {
             </li>
             <li><a href="<?php echo URL::base() . 'labyrinthManager/global/' . $templateData['map']->id; ?>"><i class="icon-edit"></i> <?php echo __('Edit'); ?></a></li>
             <li><a data-toggle="modal" href="#" data-target="#delete-labyrinth"><i class="icon-trash"></i> <?php echo __('Delete'); ?></a></li>
+            <?php if(Auth::instance()->get_user()->type->name == 'superuser'){ ?>
+            <?php if(!$templateData['map']->locked){ ?>
+            <li><a data-toggle="modal" href="#" data-target="#lock-labyrinth"><i class="icon-lock"></i> <?php echo __('Lock'); ?></a></li>
+
+            <?php }else{ ?>
+            <li><a data-toggle="modal" href="#" data-target="#unlock-labyrinth"><i class="icon-unlock"></i> <?php echo __('Unlock'); ?></a></li>
+            <?php } ?>
+        <?php } ?>
             <li><a href="<?php echo URL::base() . 'labyrinthManager/info/' . $templateData['map']->id; ?>"><i class="icon-info-sign"></i> <?php echo __('Information'); ?></a></li>
             <li><a data-toggle="modal" href="<?php echo URL::base(); ?>labyrinthManager/showDevNotes/<?php echo $templateData['map']->id; ?>" data-target="#developer-notes"><i class="icon-paper-clip"></i> Notes</a></li>
 
@@ -85,6 +93,30 @@ if (isset($templateData['map'])) {
             <p><?php echo __('You have just clicked the delete button, are you certain that you wish to proceed with deleting this labyrinth from OpenLabyrinth?'); ?></p>
             <p>
                 <a class="btn btn-danger" href="<?php echo URL::base() . 'labyrinthManager/disableMap/' . $templateData['map']->id; ?>"><?php echo __('Delete Labyrinth'); ?></a> <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </p>
+        </div>
+    </div>
+    <div class="modal hide alert alert-block alert-error fade in" id="lock-labyrinth">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="alert-heading"><?php echo __('Caution! Are you sure?'); ?></h4>
+        </div>
+        <div class="modal-body">
+            <p><?php echo __('You have just clicked the lock button, are you certain that you wish to proceed with locking this labyrinth?'); ?></p>
+            <p>
+                <a class="btn btn-warning" href="<?php echo URL::base() . 'labyrinthManager/lockMap/' . $templateData['map']->id; ?>"><?php echo __('Lock Labyrinth'); ?></a> <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </p>
+        </div>
+    </div>
+ <div class="modal hide alert alert-block alert-error fade in" id="unlock-labyrinth">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="alert-heading"><?php echo __('Caution! Are you sure?'); ?></h4>
+        </div>
+        <div class="modal-body">
+            <p><?php echo __('You have just clicked the unlock button, are you certain that you wish to proceed with unlocking this labyrinth?'); ?></p>
+            <p>
+                <a class="btn btn-warning" href="<?php echo URL::base() . 'labyrinthManager/unlockMap/' . $templateData['map']->id; ?>"><?php echo __('Unlock Labyrinth'); ?></a> <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
             </p>
         </div>
     </div>

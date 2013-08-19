@@ -79,7 +79,7 @@
             ?>
             <tr>
                 <td>
-                    <img src="<?php echo URL::base(); ?>/files/users<?php echo $map->author->id;?>.jpg">
+                    <img src="<?php echo URL::base(); ?>files/users/<?php echo $map->author->id;?>.jpg">
                 </td>
                 <td>
                     <a href="<?php echo URL::base(); ?>labyrinthManager/info/<?php echo $map->id; ?>"><?php echo $map->name; ?></a>

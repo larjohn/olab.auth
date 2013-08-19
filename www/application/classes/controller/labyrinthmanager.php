@@ -774,6 +774,23 @@ class Controller_LabyrinthManager extends Controller_Base {
 
         Request::initial()->redirect(URL::base() . 'authoredLabyrinth');
     }
+    public function action_lockMap() {
+        $mapId = (int) $this->request->param('id', 0);
+        if ($mapId) {
+            DB_ORM::model('map')->lock($mapId);
+        }
+
+        Request::initial()->redirect(URL::base() . 'labyrinthManager/global/' . $mapId);
+    }
+    public function action_unlockMap() {
+        $mapId = (int) $this->request->param('id', 0);
+        if ($mapId) {
+            DB_ORM::model('map')->unlock($mapId);
+        }
+
+        Request::initial()->redirect(URL::base() . 'labyrinthManager/global/' . $mapId);
+     
+    }
 
     public function action_global() {
         $mapId = (int) $this->request->param('id', 0);
