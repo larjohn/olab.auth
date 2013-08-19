@@ -61,16 +61,15 @@
 
     <table class="table table-striped table-bordered dataTable" id="my-labyrinths">
         <colgroup>
-            <col style="width: 50%"/>
-            <col style="width: 20%"/>
-            <col style="width: 30%"/>
+              <col style=" width: 85%"/>
+
+            <col style="width: 15%"/>
         </colgroup>
         <thead>
         <tr>
-            <th></th>
+
             <th><?php echo __('Τίτλος'); ?></th>
-            <th><?php echo __('Contributors'); ?></th>
-            <th><?php echo __('Actions'); ?></th>
+            <th><?php echo __(''); ?></th>
         </tr>
         </thead>
         <tbody>
@@ -78,24 +77,15 @@
         foreach ($templateData['maps'] as $map) {
             ?>
             <tr>
+
                 <td>
-                    <img src="<?php echo URL::base(); ?>files/users/<?php echo $map->author->id;?>.jpg">
-                </td>
-                <td>
-                    <a href="<?php echo URL::base(); ?>labyrinthManager/info/<?php echo $map->id; ?>"><?php echo $map->name; ?></a>
+                    <div class="span2"><img src="<?php echo URL::base(); ?>files/users/<?php echo $map->author->id;?>.jpg">
+                    </div>
+                    <div class="span8"> <a href="<?php echo URL::base(); ?>labyrinthManager/info/<?php echo $map->id; ?>"><?php echo $map->name; ?></a></div>
+
 
                 </td>
-                <td>
-                    <?php
-                    if (count($map->contributors) > 0) {
-                        $contributors = array();
-                        foreach ($map->contributors as $contributor) {
-                            $contributors[] = '<a href="#" rel="tooltip" title="' . ucwords($contributor->role->name) . '">' . $contributor->name . '</a>';
-                        }
-                        echo implode(', ', $contributors);
-                    }
-                    ?>
-                </td>
+
                 <td class="center">
                     <div class="btn-group">
                         <?php if (isset($templateData['rootNodeMap']) && isset($templateData['rootNodeMap'][$map->id]) && $templateData['rootNodeMap'][$map->id] != null) { ?>

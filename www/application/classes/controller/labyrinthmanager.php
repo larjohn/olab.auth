@@ -789,7 +789,7 @@ class Controller_LabyrinthManager extends Controller_Base {
         }
 
         Request::initial()->redirect(URL::base() . 'labyrinthManager/global/' . $mapId);
-     
+
     }
 
     public function action_global() {
