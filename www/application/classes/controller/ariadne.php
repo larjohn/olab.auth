@@ -30,11 +30,9 @@ class Controller_Ariadne extends Controller_Base {
     }
 
     public function action_index() {
-        if (Auth::instance()->get_user()->type->name == 'superuser') {
-            $maps = DB_ORM::model('map')->getAllAriadne();
-        } else {
-            $maps = DB_ORM::model('map')->getAllAriadne(Auth::instance()->get_user()->id);
-        }
+
+        $maps = DB_ORM::model('map')->getAllAriadne();
+
         $this->templateData['maps'] = $maps;
 
         $openView = View::factory('labyrinth/ariadne');

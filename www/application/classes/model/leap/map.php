@@ -414,7 +414,7 @@ class Model_Leap_Map extends DB_ORM_Model
     }
 
 
-    public function getAllAriadne($authorId, $limit = 0)
+    public function getAllAriadne( $limit = 0)
     {
         $limit = (int)$limit;
         $builder = DB_SQL::select('default')
