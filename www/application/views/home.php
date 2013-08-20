@@ -150,6 +150,7 @@
 
                                 <li><a href="<?php echo URL::base(); ?>dforumManager"><?php echo __('Discussion Forums'); ?></a></li>
                                 <li><a href="#"><?php echo __('Help'); ?></a></li>
+                                <li><a href="<?php echo URL::base(); ?>ariadne"><?php echo __('ΑΡΙΑΔΝΗ'); ?></a></li>
                             </ul>
                         </div>
                         <?php
