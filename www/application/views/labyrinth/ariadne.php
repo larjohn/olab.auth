@@ -105,13 +105,13 @@
                 <td class="center">
                     <div class="btn-group">
                         <?php if (isset($templateData['rootNodeMap']) && isset($templateData['rootNodeMap'][$map->id]) && $templateData['rootNodeMap'][$map->id] != null) { ?>
-                            <a class="btn btn-success"
+                            <a class="btn btn-success" target="_blank"
                                href="<?php echo URL::base(); ?>renderLabyrinth/index/<?php echo $map->id; ?>">
                                 <i class="icon-play icon-white"></i>
                                 <span class="visible-desktop">Play</span>
                             </a>
                         <?php } else { ?>
-                            <a class="btn btn-success show-root-error" href="javascript:void(0)">
+                            <a target="_blank" class="btn btn-success show-root-error" href="javascript:void(0)">
                                 <i class="icon-play icon-white"></i>
                                 <span class="visible-desktop">Play</span>
                             </a>
