@@ -92,11 +92,11 @@
             <tr>
 
                 <td>
-                    <div style="display: table-row">
-                        <div style="display: table-cell; float: none" class="span2"><img
+                    <div>
+                        <div class="span2"><img
                                 src="<?php echo URL::base(); ?>files/users/<?php echo $map->author->id; ?>.jpg">
                         </div>
-                        <div style="display: table-cell; float: none" class="span8"><?php echo $map->name; ?>
+                        <div  class="span8"><?php echo $map->name; ?>
                         </div>
                     </div>
 
