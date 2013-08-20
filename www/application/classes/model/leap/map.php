@@ -423,8 +423,6 @@ class Model_Leap_Map extends DB_ORM_Model
             ->join('LEFT', 'map_users', 'mu')
             ->on('mu.map_id', '=', 'm.id')
             ->where('enabled', '=', 1)
-            ->where('author_id', '=', $authorId, 'AND')
-            ->where('mu.user_id', '=', $authorId, 'OR')
             ->order_by('m.priority', 'DESC');
             //->order_by('m.id', 'DESC');
 
