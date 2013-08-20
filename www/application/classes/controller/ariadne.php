@@ -33,7 +33,7 @@ class Controller_Ariadne extends Controller_Base {
         if (Auth::instance()->get_user()->type->name == 'superuser') {
             $maps = DB_ORM::model('map')->getAllEnabledMap();
         } else {
-            $maps = DB_ORM::model('map')->getAllEnabledAndAuthoredMap(Auth::instance()->get_user()->id);
+            $maps = DB_ORM::model('map')->getAllAriadne(Auth::instance()->get_user()->id);
         }
         $this->templateData['maps'] = $maps;
 

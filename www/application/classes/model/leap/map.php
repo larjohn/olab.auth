@@ -151,6 +151,11 @@ class Model_Leap_Map extends DB_ORM_Model
                 'max_length' => 11,
                 'nullable' => FALSE,
             )),
+            'priority' => new DB_ORM_Field_Integer($this, array(
+                'max_length' => 11,
+                'nullable' => TRUE,
+                'default' => 99,
+            )),
         );
 
         $this->relations = array(
@@ -407,6 +412,40 @@ class Model_Leap_Map extends DB_ORM_Model
 
         return NULL;
     }
+
+
+    public function getAllAriadne($authorId, $limit = 0)
+    {
+        $limit = (int)$limit;
+        $builder = DB_SQL::select('default')
+            ->all('m.*')
+            ->from('maps', 'm')
+            ->join('LEFT', 'map_users', 'mu')
+            ->on('mu.map_id', '=', 'm.id')
+            ->where('enabled', '=', 1)
+            ->where('author_id', '=', $authorId, 'AND')
+            ->where('mu.user_id', '=', $authorId, 'OR')
+            ->order_by('m.priority', 'ASC')
+            ->order_by('m.id', 'DESC');
+
+        if ($limit) {
+            $builder->limit($limit);
+        }
+
+        $result = $builder->query();
+
+        if ($result->is_loaded()) {
+            $maps = array();
+            foreach ($result as $record) {
+                $maps[] = DB_ORM::model('map', array((int)$record['id']));
+            }
+
+            return $maps;
+        }
+
+        return NULL;
+    }
+
 
     public function getAllEnabledAndCloseMap()
     {
