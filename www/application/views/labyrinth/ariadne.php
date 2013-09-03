@@ -34,6 +34,7 @@
     <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/olab/dataTablesTB.js"></script>
 
     <div class="row-fluid" style="text-align: justify">
+        <img src='<?php echo URL::base(); ?>images/proedros.png' style="float: left;margin: 0 10px 0 0;height: 140px;"/>
         <p>
             Kαλώς ορίσατε στο ηλεκτρονικό περιβάλλον των εικονικών (ψηφιακών) ασθενών της Ιατρικής Σχολής του Α.Π.Θ.
 

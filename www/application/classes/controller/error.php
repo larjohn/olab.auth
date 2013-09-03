@@ -83,7 +83,13 @@ class Controller_Error extends Controller_Template {
             $message = str_replace('#url#', $this->toString($this->error['url']), $message);
         }
 
-        mail($to, $subject, $message, $headers);
+        try{
+            mail($to, $subject, $message, $headers);
+        }
+        catch(ErrorException $e){
+
+        }
+
     }
 
     private function writeToLog() {
