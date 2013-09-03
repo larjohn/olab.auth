@@ -226,7 +226,7 @@ class Model_Leap_Map extends DB_ORM_Model
 
     public function getAllMap()
     {
-        $builder = DB_SQL::select('default')->from($this->table());
+        $builder = DB_SQL::select('default')->from($this->table())->order_by('name');
         $result = $builder->query();
 
         if ($result->is_loaded()) {
@@ -394,6 +394,7 @@ class Model_Leap_Map extends DB_ORM_Model
             ->where('enabled', '=', 1)
             ->where('author_id', '=', $authorId, 'AND')
             ->where('mu.user_id', '=', $authorId, 'OR')
+            ->group_by('m.id')
             ->order_by('m.id', 'DESC');
         if ($limit) {
             $builder->limit($limit);
@@ -627,7 +628,7 @@ class Model_Leap_Map extends DB_ORM_Model
 
     public function getMaps($mapIDs)
     {
-        $builder = DB_SQL::select('default')->from($this->table())->where('id', 'NOT IN', $mapIDs);
+        $builder = DB_SQL::select('default')->from($this->table())->where('id', 'NOT IN', $mapIDs)->order_by('name');
         $result = $builder->query();
 
         if ($result->is_loaded()) {
@@ -864,6 +865,30 @@ class Model_Leap_Map extends DB_ORM_Model
         }
 
         return NULL;
+    }
+
+    public function getAllowedMap($userId) {
+
+        $builder = DB_SQL::select('default', array(DB_SQL::expr('m.id')))
+            ->from('maps', 'm')
+            ->join('LEFT', 'map_users', 'mu')
+            ->on('mu.map_id', '=', 'm.id')
+            ->where('enabled', '=', 1)
+            ->where('author_id', '=', $userId, 'AND')
+            ->where('mu.user_id', '=', $userId, 'OR')
+            ->order_by('m.id', 'DESC');
+
+        $result = $builder->query();
+
+        $res = array();
+
+        if ($result->is_loaded()) {
+            foreach ($result as $record => $val) {
+                $res[] =  $val['id'];
+            }
+        }
+        return $res;
+
     }
 }
 

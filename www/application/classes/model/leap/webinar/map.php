@@ -88,6 +88,20 @@ class Model_Leap_Webinar_Map extends DB_ORM_Model {
     }
 
     /**
+     * Remove maps for webinar step
+     *
+     * @param integer $webinarId - webinar ID
+     * @param integer $stepId - step ID
+     */
+    public function removeMapsForStep($webinarId, $stepId) {
+        DB_SQL::delete('default')
+                ->from($this->table())
+                ->where('webinar_id', '=', $webinarId, 'AND')
+                ->where('step', '=', $stepId)
+                ->execute();
+    }
+
+    /**
      * Remove webinar map
      *
      * @param integer $webinarId - webinar ID

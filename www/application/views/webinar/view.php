@@ -48,10 +48,23 @@
             <?php foreach($templateData['webinars'] as $webinar) { ?>
                 <tr>
                     <td><a href="<?php echo URL::base(); ?>"><?php echo $webinar->title; ?></a></td>
-                    <td><?php echo $webinar->current_step == null ? '-' : $webinar->current_step; ?></td>
+                    <td>
+                        <?php
+                        if($webinar->current_step != null && $webinar->steps != null && count($webinar->steps) > 0) {
+                            foreach($webinar->steps as $webinarStep) {
+                                if($webinarStep->id == $webinar->current_step) {
+                                    echo $webinarStep->name;
+                                    break;
+                                }
+                            }
+                        } else {
+                            echo '-';
+                        }
+                        ?>
+                    </td>
                     <td class="center">
                         <div class="btn-group">
-                            <a class="btn btn-success" href="<?php echo URL::base() . 'webinarManager/statistic/' . $webinar->id; ?>">
+                            <a class="btn btn-success" href="<?php echo URL::base() . 'webinarManager/progress/' . $webinar->id; ?>">
                                 <i class="icon-play icon-white"></i>
                                 <span class="visible-desktop">View progress</span>
                             </a>
@@ -68,6 +81,10 @@
                             <a class="btn btn-info" href="<?php echo URL::base(); ?>webinarManager/edit/<?php echo $webinar->id; ?>">
                                 <i class="icon-edit icon-white"></i>
                                 Edit
+                            </a>
+                            <a class="btn btn-info" href="<?php echo URL::base(); ?>webinarManager/statistics/<?php echo $webinar->id; ?>">
+                                <i class="icon-calendar icon-white"></i>
+                                Statistics
                             </a>
                             <a data-toggle="modal" href="javascript:void(0)" data-target="#reset-webinar-<?php echo $webinar->id; ?>" class="btn btn-warning"><i class="icon-refresh icon-white"></i><?php echo __('Reset'); ?></a>
                             <a data-toggle="modal" href="javascript:void(0)" data-target="#delete-node-<?php echo $webinar->id; ?>" class="btn btn-danger"><i class="icon-trash icon-white"></i><?php echo __('Delete'); ?></a>
@@ -91,9 +108,14 @@
                             </div>
                             <div class="modal-body">
                                 <p>
-                                    <div><input class="current-step-<?php echo $webinar->id; ?>" type="radio" name="currentStep<?php echo $webinar->id; ?>" value="1" <?php if($webinar->current_step == 1) echo 'checked'; ?>> Step 1</div>
-                                    <div><input class="current-step-<?php echo $webinar->id; ?>" type="radio" name="currentStep<?php echo $webinar->id; ?>" value="2" <?php if($webinar->current_step == 2) echo 'checked'; ?>> Step 2</div>
-                                    <div><input class="current-step-<?php echo $webinar->id; ?>" type="radio" name="currentStep<?php echo $webinar->id; ?>" value="3" <?php if($webinar->current_step == 3) echo 'checked'; ?>> Step 3</div>
+                                <?php if(count($webinar->steps) > 0) { ?>
+                                    <?php foreach($webinar->steps as $webinarStep) { ?>
+                                        <div>
+                                            <input class="current-step-<?php echo $webinar->id; ?>" type="radio" name="currentStep<?php echo $webinar->id; ?>" value="<?php echo $webinarStep->id; ?>" <?php if($webinar->current_step == $webinarStep->id) echo 'checked'; ?>>
+                                            <?php echo $webinarStep->name; ?>
+                                        </div>
+                                    <?php } ?>
+                                <?php } ?>
                                 </p>
                             </div>
                             <div class="modal-footer">

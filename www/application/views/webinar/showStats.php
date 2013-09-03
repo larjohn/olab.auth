@@ -20,7 +20,7 @@
  */
 ?>
 <div class="page-header">
-    <h1><?php echo __('Scenario Progress'); ?></h1>
+    <h1><?php echo __('Progress for') . ' ' . $templateData['webinar']->title; ?></h1>
 </div>
 
 <?php $stepKeyMap = array(
@@ -36,28 +36,24 @@
             <?php
             $stepsHeaders = array();
 
-            // formate publish steps
             $mapSteps = array();
             foreach($templateData['webinarData'] as $userId => $steps) {
                 foreach($steps as $stepKey => $step) {
-                        foreach($step as $mapId => $map) {
-                            $mapSteps[$stepKey][] = $map['status'];
-                        }
+                    foreach($step as $mapId => $map) {
+                        $mapSteps[$stepKey][] = $map['status'];
+                    }
                 }
             }
 
             foreach($templateData['webinarData'] as $userId => $steps) {
-
-                foreach($steps as $stepKey => $step) {
-//                    //$isShowReport = true;
+                foreach($steps as $stepKey => $step){
+//                    $isShowReport = true;
 //                    foreach($step as $mapId => $map) {
-//                        //echo $map['status'].'<br />';
-////                        if($map['status'] != 2) {
-////                            $isShowReport = false;
-////                            break;
-////                        }
+//                        if($map['status'] != 2) {
+//                            $isShowReport = false;
+//                            break;
+//                        }
 //                    }
-
                     if(!isset($stepsHeaders[$stepKey]) || $stepsHeaders[$stepKey]['count'] < count($step)) {
 
                         $isShowReport = false;
@@ -67,14 +63,11 @@
 
                         $stepsHeaders[$stepKey]['count'] = count($step);
                         $stepsHeaders[$stepKey]['html']  = '<td colspan="' . $stepsHeaders[$stepKey]['count'] . '">' .
-                                                                (isset($templateData['webinarStepMap'][$stepKey]) ? ($templateData['webinar']->current_step == $stepKey) ? '<span style="color:#0088cc;font-weight:bold">' . $templateData['webinarStepMap'][$stepKey]->name . '</span>'
-                                                                                                                                                                         : $templateData['webinarStepMap'][$stepKey]->name
-                                                                                                                  : '-') .
-                                                                (($isShowReport && Auth::instance()->get_user()->type->name != 'learner' && Auth::instance()->get_user()->type->name != 'reviewer')
-                                                                    ? ' <a data-toggle="tooltip" data-placement="top" title="" data-original-title="Get 4R report for this step" href="' . URL::base() .
-                                                                    'webinarManager/stepReport/' . $templateData['webinar']->id . '/' . $stepKey . '" style="text-decoration: none;font-size: 130%;"><i class="icon-eye-open"></i></a>
-
-                                                                                   <a data-toggle="tooltip" data-placement="top" title="" data-original-title="Publish 4R report for this step" href="' . URL::base() . 'webinarManager/publishStep/' . $templateData['webinar']->id . '/' . $stepKey . '" style="text-decoration: none;font-size: 130%;"><i class="icon-upload"></i></a>'
+                            (isset($templateData['webinarStepMap'][$stepKey]) ? ($templateData['step'] == $stepKey) ? '<span style="color:#0088cc;font-weight:bold">' . $templateData['webinarStepMap'][$stepKey]->name . '</span>'
+                                : $templateData['webinarStepMap'][$stepKey]->name
+                                : '-') .
+                                                                ($isShowReport ? ' <a data-toggle="tooltip" data-placement="top" title="" data-original-title="Get 4R report for this step" href="' . URL::base() . 'webinarManager/stepReport/' . $templateData['webinar']->id . '/' . $stepKey . '/' .  $templateData['dateId'].'" style="text-decoration: none;font-size: 130%;"><i class="icon-eye-open"></i></a>
+                                                                                   <a data-toggle="tooltip" data-placement="top" title="" data-original-title="Publish 4R report for this step" href="' . URL::base() . 'webinarManager/publishStep/' . $templateData['webinar']->id . '/' . $stepKey . '/' . $templateData['dateId'] .  '" style="text-decoration: none;font-size: 130%;"><i class="icon-upload"></i></a>'
                                                                                : '') .
                                                            '</td>';
                     }
@@ -108,9 +101,9 @@
                 foreach($m as $mapId => $v) {
             ?>
                 <td style="text-align: center; font-weight: bold;">
-                    <?php echo $v['map']->name;?>
-                    <?php if($v['showReport'] && Auth::instance()->get_user()->type->name != 'learner' && Auth::instance()->get_user()->type->name != 'reviewer') { ?>
-                        <a data-toggle="tooltip" data-placement="top" title="" data-original-title="Get 4R report for this labyrinth" href="<?php echo URL::base(); ?>webinarManager/mapReport/<?php echo $templateData['webinar']->id; ?>/<?php echo $v['map']->id; ?>" style="text-decoration: none;"><i class="icon-eye-open"></i></a>
+                    <?php echo $v['map']->name; ?>
+                    <?php if($v['showReport']) { ?>
+                        <a data-toggle="tooltip" data-placement="top" title="" data-original-title="Get 4R report for this labyrinth" href="<?php echo URL::base(); ?>webinarManager/mapReport/<?php echo $templateData['webinar']->id; ?>/<?php echo $v['map']->id; ?>/<?php echo $templateData['dateId']; ?>" style="text-decoration: none;"><i class="icon-eye-open"></i></a>
                     <?php } ?>
                 </td>
             <?php }} ?>
@@ -120,7 +113,7 @@
             <td><?php echo isset($templateData['usersMap'][$userId]) ? $templateData['usersMap'][$userId]->nickname : '-'; ?></td>
             <?php $icon = (isset($templateData['usersAuthMap'][$userId]) && $templateData['usersAuthMap'][$userId]['icon'] != NULL) ? 'oauth/'.$templateData['usersAuthMap'][$userId]['icon'] : 'openlabyrinth-header.png' ; ?>
             <td style="width: 50px;text-align: center;"> <img <?php echo (isset($templateData['usersAuthMap'][$userId]) && $templateData['usersAuthMap'][$userId]['icon'] != NULL) ? 'width="32"' : ''; ?> src=" <?php echo URL::base() . 'images/' . $icon ; ?>" border="0"/></td>
-            <td style="width: 120px;"><input type="checkbox" id="check<?php echo $userId; ?>" name="users_include[]" value="<?php echo $userId; ?>" <?php echo 'checked="checked"'; ?> onclick="ajaxCheck(<?php echo $templateData['includeUsersData'][$userId]; ?> , $('#check<?php echo $userId; ?> ').attr('checked') ? 1 : 0 )" >&nbsp;Include in report</td>
+            <td style="width: 120px;"><input type="checkbox" id="check<?php echo $userId; ?>" name="users_include[]" value="<?php echo $userId; ?>" <?php if($templateData['includeUsers'][$userId]) echo 'checked="checked"'; ?> onclick="ajaxCheck(<?php echo $templateData['includeUsersData'][$userId]; ?> , $('#check<?php echo $userId; ?> ').attr('checked') ? 1 : 0 )" >&nbsp;&nbsp;&nbsp;Include in report</td>
             <?php
             foreach($steps as $stepKey => $step) {
                 foreach($step as $mapId => $map) {
@@ -144,16 +137,17 @@
         <?php } ?>
         </tbody>
     </table>
+    <div class="form-actions">
+        <div class="pull-right">
+            <a class="btn btn-info" href="<?php echo URL::base(); ?>dforumManager/viewForum/<?php echo $templateData['webinar']->forum_id;?>">
+                <i class="icon-comment icon-white"></i>
+                Go to Discussion Forum Topic
+            </a>
+        </div>
+    </div>
 <?php } ?>
 
-<div class="form-actions">
-    <div class="pull-right">
-        <a class="btn btn-info" href="<?php echo URL::base(); ?>dforumManager/viewForum/<?php echo $templateData['webinar']->forum_id;?>">
-            <i class="icon-comment icon-white"></i>
-            Go to Discussion Forum Topic
-        </a>
-    </div>
-</div>
+
 
 
 <script>

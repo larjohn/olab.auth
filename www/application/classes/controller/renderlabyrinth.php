@@ -81,7 +81,14 @@ class Controller_RenderLabyrinth extends Controller_Template {
                                 $data['node_text'] .= '[[INFO:' . $data['node']->id . ']]';
                             }
 
+                            if (( $data['node']->info == '' ) && (strpos($data['node_text'],'[[INFO:')))
+                            {
+                                $search = '[[INFO:' . $data['node']->id . ']]';
+                                $data['node_text'] = str_replace($search, '',$data['node_text']);
+                            }
+
                             $data['node_text'] = $this->parseText($data['node_text'], $mapId);
+
                         }
 
                         $data['trace_links'] = $this->generateReviewLinks($data['traces']);
@@ -182,6 +189,18 @@ class Controller_RenderLabyrinth extends Controller_Template {
                     if ($editOn != NULL and $editOn == 1) {
                         $data['node_edit'] = TRUE;
                     } else {
+
+                        if (( $data['node']->info != '' ) && (strpos($data['node_text'],'[[INFO:') === false))
+                        {
+                            $data['node_text'] .= '[[INFO:' . $data['node']->id . ']]';
+                        }
+
+                        if (( $data['node']->info == '' ) && (strpos($data['node_text'],'[[INFO:')))
+                        {
+                            $search = '[[INFO:' . $data['node']->id . ']]';
+                            $data['node_text'] = str_replace($search, '',$data['node_text']);
+                        }
+
                         $data['node_text'] = $this->parseText($data['node_text'], $mapId);
                     }
                     $data['trace_links'] = $this->generateReviewLinks($data['traces']);
@@ -203,6 +222,13 @@ class Controller_RenderLabyrinth extends Controller_Template {
 
                         $data['timeForNode'] = $timeForNode;
                         $data['session'] = $sessionId;
+
+                        if ($data['node']->undo) {
+                            $undoLinks = $this->prepareUndoLinks($sessionId,$mapId);
+
+                            $data['undoLinks'] = $undoLinks;
+                        }
+
                     }
 
                     $this->template = View::factory('labyrinth/skin/basic/basic');
@@ -286,6 +312,20 @@ class Controller_RenderLabyrinth extends Controller_Template {
         } else {
             Request::initial()->redirect(URL::base());
         }
+    }
+
+    public function action_undo() {
+        $mapId = $this->request->param('id', NULL);
+        $nodeId = $this->request->param('id2', NULL);
+
+        if ($mapId != NULL and $nodeId != NULL) {
+            Model::factory('labyrinth')->review($nodeId);
+            Model::factory('labyrinth')->undo($nodeId);
+            Request::initial()->redirect(URL::base() . 'renderLabyrinth/go/' . $mapId . '/' . $nodeId);
+        } else {
+            Request::initial()->redirect(URL::base());
+        }
+
     }
 
     public function action_chatAnswer() {
@@ -1308,5 +1348,25 @@ class Controller_RenderLabyrinth extends Controller_Template {
         return '';
     }
 
+
+    private function prepareUndoLinks($sessionId,$mapId) {
+        $traces = DB_ORM::model('user_sessiontrace')->getUniqueTraceBySessions(array($sessionId));
+
+        //Delete root node and current node
+        array_shift($traces);
+       // array_pop($traces);
+
+        $html = '<ul class="links navigation">';
+
+        if (count($traces) > 0) {
+            foreach($traces as &$trace){
+                $trace['node_name'] = DB_ORM::model('map_node')->getNodeName($trace['node_id']);
+                $html .= '<li><i><font color="#777799">' .$trace['node_name'] . '</font></i><a href=' . URL::base() . 'renderLabyrinth/undo/' . $mapId . '/' .$trace['node_id'] .'>'  . ' [undo]' . '</a></li>';
+            }
+        }
+        $html .= '</ul>';
+
+        return $html;
+    }
 }
 

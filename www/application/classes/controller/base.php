@@ -42,8 +42,8 @@ class Controller_Base extends Controller_Template {
     );
     private $learnerRules = array(
         array('controller' => 'authoredLabyrinth', 'action' => 'index', 'isFullController' => true),
-
-        array('controller' => 'collectionManager', 'action' => 'index', 'isFullController' => true),
+        array('controller' => 'collectionManager', 'action' => 'editCollection'),
+        array('controller' => 'collectionManager', 'action' => 'addCollection'),
         array('controller' => 'labyrinthManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'exportImportManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'presentationManager', 'action' => 'index', 'isFullController' => true),
@@ -51,8 +51,8 @@ class Controller_Base extends Controller_Template {
         array('controller' => 'userManager', 'action' => 'index'),
         array('controller' => 'userManager', 'action' => 'addUser'),
         array('controller' => 'userManager', 'action' => 'saveNewUser'),
-        array('controller' => 'userManager', 'action' => 'editUser'),
-        array('controller' => 'userManager', 'action' => 'saveOldUser'),
+        //array('controller' => 'userManager', 'action' => 'editUser'),
+        //array('controller' => 'userManager', 'action' => 'saveOldUser'),
         array('controller' => 'userManager', 'action' => 'deleteUser'),
         array('controller' => 'userManager', 'action' => 'addGroup'),
         array('controller' => 'userManager', 'action' => 'saveNewGroup'),
@@ -74,14 +74,14 @@ class Controller_Base extends Controller_Template {
         array('controller' => 'dForumManager', 'action' => 'saveNewForum')
     );
     private $authorRules = array(
-        array('controller' => 'collectionManager', 'action' => 'index', 'isFullController' => true),
+//        array('controller' => 'collectionManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'presentationManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'remoteServiceManager', 'action' => 'index', 'isFullController' => true),
         array('controller' => 'userManager', 'action' => 'index'),
         array('controller' => 'userManager', 'action' => 'addUser'),
         array('controller' => 'userManager', 'action' => 'saveNewUser'),
-        array('controller' => 'userManager', 'action' => 'editUser'),
-        array('controller' => 'userManager', 'action' => 'saveOldUser'),
+
+        //array('controller' => 'userManager', 'action' => 'saveOldUser'),
         array('controller' => 'userManager', 'action' => 'deleteUser'),
         array('controller' => 'userManager', 'action' => 'addGroup'),
         array('controller' => 'userManager', 'action' => 'saveNewGroup'),

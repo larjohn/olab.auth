@@ -21,9 +21,9 @@
 defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Model for users table in database
+ * Model for webinar steps table in database
  */
-class Model_Leap_Webinar_User extends DB_ORM_Model {
+class Model_Leap_Webinar_Step extends DB_ORM_Model {
 
     public function __construct() {
         parent::__construct();
@@ -32,34 +32,28 @@ class Model_Leap_Webinar_User extends DB_ORM_Model {
             'id' => new DB_ORM_Field_Integer($this, array(
                 'max_length' => 11,
                 'nullable' => FALSE,
-                'unsigned' => TRUE
+                'unsigned' => TRUE,
             )),
 
             'webinar_id' => new DB_ORM_Field_Integer($this, array(
                 'max_length' => 11,
                 'nullable' => FALSE,
-                'unsigned' => TRUE
+                'unsigned' => TRUE,
             )),
 
-            'user_id' => new DB_ORM_Field_Integer($this, array(
-                'max_length' => 11,
+            'name' => new DB_ORM_Field_String($this, array(
+                'max_length' => 255,
                 'nullable' => FALSE,
-                'unsigned' => TRUE
+                'savable' => TRUE
             )),
-
-            'include_4R' => new DB_ORM_Field_Integer($this, array(
-                'max_length' => 11,
-                'nullable' => FALSE,
-                'unsigned' => TRUE
-            ))
         );
 
         $this->relations = array(
-            'user' => new DB_ORM_Relation_BelongsTo($this, array(
-                'child_key' => array('user_id'),
-                'parent_key' => array('id'),
-                'parent_model' => 'user',
-            ))
+            'maps' => new DB_ORM_Relation_HasMany($this, array(
+                'child_key' => array('step', 'webinar_id'),
+                'child_model' => 'webinar_map',
+                'parent_key' => array('id', 'webinar_id')
+            )),
         );
     }
 
@@ -68,7 +62,7 @@ class Model_Leap_Webinar_User extends DB_ORM_Model {
     }
 
     public static function table() {
-        return 'webinar_users';
+        return 'webinar_steps';
     }
 
     public static function primary_key() {
@@ -76,11 +70,11 @@ class Model_Leap_Webinar_User extends DB_ORM_Model {
     }
 
     /**
-     * Remove all users from webinar
+     * Remove all steps from webinar
      *
-     * @param $webinarId
+     * @param integer $webinarId - webinar ID
      */
-    public function removeUsers($webinarId) {
+    public function removeSteps($webinarId) {
         DB_SQL::delete('default')
                 ->from($this->table())
                 ->where('webinar_id', '=', $webinarId)
@@ -88,40 +82,40 @@ class Model_Leap_Webinar_User extends DB_ORM_Model {
     }
 
     /**
-     * Add user to webinar
+     * Add new step
      *
-     * @param integer $webinarId - webinar id
-     * @param integer $userId - user id
+     * @param integer $webinarId - webinar ID
+     * @param string $stepName - step name
+     * @return integer - new webinar step ID
      */
-    public function addUser($webinarId, $userId) {
-        return DB_ORM::insert('webinar_user')
+    public function addStep($webinarId, $stepName) {
+        return DB_ORM::insert('webinar_step')
                        ->column('webinar_id', $webinarId)
-                       ->column('user_id', $userId)
+                       ->column('name', $stepName)
                        ->execute();
     }
 
-    public function updateInclude4R($id,$isInclude) {
-        $this->id = $id;
-        $this->load();
-        $this->include_4R = $isInclude;
-        $this->save();
+    /**
+     * Remove webinar step
+     *
+     * @param integer $stepId - webinar step ID
+     */
+    public function removeStep($stepId) {
+        DB_ORM::delete('webinar_step')
+                ->where('id', '=', $stepId)
+                ->execute();
     }
 
-    public function getNotIncludedUsers($webId) {
-
-        $builder = DB_SQL::select('default',array(DB::expr('user_id')))
-            ->from($this->table())
-            ->where('webinar_id', '=', $webId,'AND')
-            ->where('include_4R', '=', 0);
-
-        $result = $builder->query();
-
-        $users = array();
-        if ($result->is_loaded()) {
-            foreach ($result as $record => $val) {
-                $users[] = $val['user_id'];
-            }
-        }
-        return $users;
+    /**
+     * Update webinar step
+     *
+     * @param integer $stepId - webinar step ID
+     * @param string $name - new step name
+     */
+    public function updateStep($stepId, $name) {
+        DB_ORM::update('webinar_step')
+                ->set('name', $name)
+                ->where('id', '=', $stepId)
+                ->execute();
     }
 }

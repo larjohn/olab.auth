@@ -268,7 +268,7 @@ class Model_Leap_User_SessionTrace extends DB_ORM_Model {
         $builder->execute();
     }
     
-    public function getTraceBySessionID($sessionId) {
+    public function getTraceBySessionID($sessionId , $getType = 'obj') {
         $builder = DB_SQL::select('default')
                 ->from($this->table())
                 ->where('session_id', '=', $sessionId)
@@ -276,11 +276,17 @@ class Model_Leap_User_SessionTrace extends DB_ORM_Model {
         $result = $builder->query();
         
         if($result->is_loaded()) {
+
             $traces = array();
             foreach($result as $record) {
-                $traces[] = DB_ORM::model('user_sessionTrace', array((int)$record['id']));
+                if ($getType != 'array') {
+                    $traces[] = DB_ORM::model('user_sessionTrace', array((int)$record['id']));
+                }
+                else {
+                    $traces[] = $record;
+                }
             }
-            
+
             return $traces;
         }
         
@@ -335,6 +341,34 @@ class Model_Leap_User_SessionTrace extends DB_ORM_Model {
                            ->query();
 
         return $records->is_loaded();
+    }
+
+    public function getDateStampBySessionAndNodeId($sessionId, $nodeId){
+        $result = DB_SQL::select('default')
+            ->from($this->table())
+            ->column('date_stamp')
+            ->where('session_id', '=', $sessionId, 'AND')
+            ->where('node_id', '=', $nodeId)
+            ->limit(1)
+            ->query();
+
+        if ($result->is_loaded()) {
+            $res = array();
+            foreach($result as $record) {
+                $res[] = $record['date_stamp'];
+            }
+        }
+
+        return $res;
+    }
+
+    public function updateSession($sessionId, $nodeId, $mapId, $dateStamp) {
+        $builder = DB_ORM::delete('user_sessiontrace')
+            ->where('session_id', '=', $sessionId)
+            ->where('node_id', '=', $nodeId)
+            ->where('map_id', '=', $mapId)
+            ->where('date_stamp', '>=', $dateStamp);
+        $builder->execute();
     }
 }
 
