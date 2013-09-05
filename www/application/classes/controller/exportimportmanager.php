@@ -1115,7 +1115,11 @@ class Controller_ExportImportManager extends Controller_Base {
         $string = html_entity_decode($string, $quote_style, $charset);
         $string = preg_replace_callback('~&#x([0-9a-fA-F]+);~i', array($this,"chr_utf8_callback"), $string);
           $string = html_entity_decode($string, $quote_style, $charset);
-        $string = preg_replace('~&#([0-9]+);~e', $this->chr_utf8("\\1"), $string);
+        $string = preg_replace_callback('~&#([0-9]+);~',
+            function ($m){
+                return($this->chr_utf8($m[1]));
+            }
+            , $string);
         return $string;
     }
 

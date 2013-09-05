@@ -33,7 +33,7 @@ if (isset($templateData['maps'])) { ?>
                                                 <?php if(isset($templateData['rootNodeMap']) && isset($templateData['rootNodeMap'][$templateData['map']->id]) && $templateData['rootNodeMap'][$templateData['map']->id] != null) { ?>
                                                     <a href="<?php echo URL::base() . 'renderLabyrinth/index/' . $templateData['map']->id; ?>" target="_blank"><?php echo $map->name; ?></a>
                                                 <?php } else { ?>
-                                                    <a class="show-root-error" href="javascript:void(0)"><?php echo $map->name; ?></a>
+                                                    <a href="<?php echo URL::base() . 'renderLabyrinth/index/' . $templateData['map']->id; ?>" target="_blank"><?php echo $map->name; ?></a>
                                                 <?php } ?>
                                             </p>
                                         </td>
