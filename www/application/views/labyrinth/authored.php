@@ -93,7 +93,8 @@
                                 <span class="visible-desktop">Play</span>
                             </a>
                         <?php } else { ?>
-                            <a class="btn btn-success show-root-error" href="javascript:void(0)">
+                            <a class="btn btn-success"
+                               href="<?php echo URL::base(); ?>renderLabyrinth/index/<?php echo $map->id; ?>">
                                 <i class="icon-play icon-white"></i>
                                 <span class="visible-desktop">Play</span>
                             </a>
