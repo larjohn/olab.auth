@@ -45,6 +45,7 @@ class Model_Labyrinth extends Model {
 
             $result['node_title'] = $node->title;
             $result['node_text'] = $node->text;
+            $result['node_annotation'] = $node->annotation;
 				
             $sessionId = NULL;
             if($bookmark != NULL) {
@@ -500,8 +501,10 @@ class Model_Labyrinth extends Model {
                 $commonRules = DB_ORM::model('map_counter_commonrules')->getRulesByMapId($node->map_id);
                 if (count($commonRules) > 0){
                     $values = array();
-                    foreach($countersArray as $key => $counter){
-                        $values[$key] = $counter['value'];
+                    if (count($countersArray) > 0){
+                        foreach($countersArray as $key => $counter){
+                            $values[$key] = $counter['value'];
+                        }
                     }
                     $runtimelogic = new RunTimeLogic();
                     $runtimelogic->values = $values;
@@ -742,17 +745,6 @@ class Model_Labyrinth extends Model {
         }
     }
 
-    public function undo($nodeId){
-        $sessionId = Session::instance()->get('session_id', NULL);
-        if ($sessionId != NULL and $nodeId != NULL) {
-            $node = DB_ORM::model('map_node', array((int) $nodeId));
-
-            $dateStamp = DB_ORM::model('user_sessionTrace')->getDateStampBySessionAndNodeId($sessionId,$nodeId);
-
-            DB_ORM::model('user_sessionTrace')->updateSession($sessionId,$nodeId,$node->map_id,$dateStamp);
-        }
-    }
-
     public function getChatResponce($sessionId, $mapId, $chatId, $elementId) {
         $chat = DB_ORM::model('map_chat', array((int) $chatId));
 
@@ -839,8 +831,10 @@ class Model_Labyrinth extends Model {
                     $mapID = $question->map_id;
                     $counters = DB_ORM::model('map_counter')->getCountersByMap($mapID);
                     $values = array();
-                    foreach($counters as $counter){
-                        $values[$counter->id] = $this->getCounterValueByID($mapID, $counter->id);
+                    if (count($counters) > 0){
+                        foreach($counters as $counter){
+                            $values[$counter->id] = $this->getCounterValueByID($mapID, $counter->id);
+                        }
                     }
                     $runtimelogic = new RunTimeLogic();
                     $runtimelogic->values = $values;

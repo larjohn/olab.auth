@@ -117,6 +117,21 @@
                                     <input type="text" id="nodesupportkeywords" value="" />
                                 </div>
                             </div>
+                            <div class="control-group block">
+                                <label for="show_info"
+                                       class="control-label"><strong><?php echo __('Show "Supporting Information" button in the bottom of node'); ?></strong></label>
+
+                                <div class="controls block">
+                                    <input id="show_info" name="show_info" type="checkbox"/>
+                                </div>
+                            </div>
+                            <div class="control-group block">
+                                <label for="annotation"
+                                       class="control-label"><strong><?php echo __('Annotation'); ?></strong></label>
+                                <div class="controls block">
+                                    <textarea class="mceEditorLite" name="annotation" id="annotation"></textarea>
+                                </div>
+                            </div>
                             <div>
                                 <?php if (isset($templateData['counters']) and count($templateData['counters']) > 0) { ?>
                                     <div>
@@ -186,7 +201,7 @@
                                 </div>
                                 <div class="span6">
                                     <div class="control-group">
-                                        <label class="control-label"><strong>Undo Links</strong></label>
+                                        <label class="control-label"><strong>Prevent Revisit</strong></label>
 
                                         <div class="controls" id="nodeUndoLinks">
                                             <label class="radio">Enabled<input name="undo" type="radio" value="1"></label>

@@ -30,7 +30,29 @@ function getRandomColor(){
 ?>
 <?php if (isset($templateData['session'])) { ?>
 
-                <h1><?php echo __('Labyrinth session "') . $templateData['session']->map->name . '"' . ' user ' . $templateData['session']->user->nickname; ?></h1>
+    <?php if (isset($templateData['nextCase']) || isset($templateData['webinarForum']) || isset($templateData['webinarID'])) { ?>
+    <h3>Scenario actions</h3>
+    <div>
+    <?php if(isset($templateData['nextCase'])) { ?>
+        <a href="<?php echo URL::base(); ?>webinarManager/play/<?php echo $templateData['nextCase']['webinarId']; ?>/<?php echo $templateData['nextCase']['webinarStep']; ?>/<?php echo $templateData['nextCase']['webinarMap']; ?>" class="btn btn-success"><i class="icon-play"></i><?php echo __("Play the next labyrinth"); ?></a>
+    <?php }
+    if(isset($templateData['webinarForum'])) { ?>
+        <a class="btn btn-info" href="<?php echo URL::base(); ?>dforumManager/viewForum/<?php echo $templateData['webinarForum'];?>">
+            <i class="icon-comment icon-white"></i>
+            <?php echo __('Go to the Forum Topic'); ?>
+        </a>
+    <?php }
+    if(isset($templateData['webinarForum'])) { ?>
+        <a class="btn" href="<?php echo URL::base(); ?>webinarManager/render/<?php echo $templateData['webinarID'];?>">
+            <i class="icon-folder-open icon-white"></i>
+            <?php echo __('Go to the Scenario steps'); ?>
+        </a>
+    <?php } ?>
+    </div>
+    <hr/>
+    <?php } ?>
+
+    <h1><?php echo __('Labyrinth session "') . $templateData['session']->map->name . '"' . ' user ' . $templateData['session']->user->nickname; ?></h1>
 
     <table class="table  table-striped table-bordered">
         <tr>
@@ -81,7 +103,6 @@ function getRandomColor(){
         </tr>
     </table>
 
-
     <?php if(isset($templateData['feedbacks']['general'])){?>
     <table class="table table-striped table-bordered">
 
@@ -98,7 +119,6 @@ function getRandomColor(){
         </tr>
 
         <?php } ?>
-
 
     <?php if(isset($templateData['feedbacks']['nodeVisit']) and count($templateData['feedbacks']['nodeVisit']) > 0) { ?>
         <tr>
@@ -126,9 +146,6 @@ function getRandomColor(){
 
     </table>
 <?php } ?>
-
-
-             
                             <h3><?php echo __('Questions'); ?></h3>
                             <table class="table table-striped table-bordered">
                                 <thead>
@@ -177,11 +194,7 @@ function getRandomColor(){
                                     <?php } ?>
                                 <?php } ?>
                                 </tbody>
-
-
                             </table>
-
-
 
                             <table class="table table-striped table-bordered">
                                 <thead>
@@ -207,7 +220,6 @@ function getRandomColor(){
                                 </tbody>
                             </table>
 
-                
                 <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" width="565" height="420">
                     <param name="FlashVars" value="&dataXML=<graph bgcolor='FFFFFF' canvasbgcolor='FFFFFF' xaxisname='node path (node IDs)' yaxisname='time on node (s)' caption='Node Path Analysis'>
                         <?php if (count($templateData['session']->traces) > 0) {
@@ -241,8 +253,6 @@ function getRandomColor(){
                         <?php } ?>
                            </graph>" quality="high" bgcolor="#FFFFFF" name="Line" align="" width="565" height="420" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">
                 </object>
-
-
 
                 <h3>Counters Track</h3>
                 <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" width="565" height="420">

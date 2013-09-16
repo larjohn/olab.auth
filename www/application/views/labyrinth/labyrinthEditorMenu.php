@@ -30,7 +30,7 @@ if (isset($templateData['map'])) {
                     <a class="show-root-error" href="javascript:void(0)"><i class="icon-play icon-white"></i> <?php echo __('Play'); ?></a><div class="pull-right arrow"></div>
                 <?php } ?>
             </li>
-            <li><a href="<?php echo URL::base() . 'labyrinthManager/global/' . $templateData['map']->id; ?>"><i class="icon-edit"></i> <?php echo __('Edit'); ?></a></li>
+            <li><a href="<?php echo URL::base() . 'labyrinthManager/global/' . $templateData['map']->id; ?>"><i class="icon-edit"></i> <?php echo __('Details'); ?></a></li>
             <li><a data-toggle="modal" href="#" data-target="#delete-labyrinth"><i class="icon-trash"></i> <?php echo __('Delete'); ?></a></li>
             <?php if(Auth::instance()->get_user()->type->name == 'superuser'){ ?>
             <?php if(!$templateData['map']->locked){ ?>
