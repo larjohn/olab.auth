@@ -481,6 +481,13 @@ class Controller_ExportImportManager extends Controller_Base {
             return true;
         }
 
+        if(isset($xml->general->identifier->catalog) && $xml->general->identifier->catalog == 'vpSim') {
+            ImportExport_Manager::getFormatSystem('MVPvpSim')->import(array('tmpFolder'        => $tmpFolder,
+                                                                            'filesFolder'      => DOCROOT . 'files',
+                                                                            'filesShortFolder' => 'files'));
+            return true;
+        }
+
         if(isset($xml->general->version))
             $version = (string)$xml->general->version;
 
@@ -520,14 +527,16 @@ class Controller_ExportImportManager extends Controller_Base {
                     $id = (string) $attr->identifier;
                     $elements[$id]['href'] = (string) $attr->href;
                     $fileName = $this->endc(explode('/', (string) $attr->href));
-                    copy($tmpFolder . (string) $attr->href, DOCROOT . '/files/'.$map->id.'/' . $fileName);
-                    $values['path'] = 'files/'.$map->id.'/' . $fileName;
-                    $values['name'] = $fileName;
+                    if (file_exists($tmpFolder . (string) $attr->href)){
+                        copy($tmpFolder . (string) $attr->href, DOCROOT . '/files/'.$map->id.'/' . $fileName);
+                        $values['path'] = 'files/'.$map->id.'/' . $fileName;
+                        $values['name'] = $fileName;
 
-                    $elementDB = DB_ORM::model('map_element')->saveElement($map->id, $values);
-                    $elements[$id]['database_id'] = $elementDB->id;
-                    $findElement[] = '[[MR:' . $id . ']]';
-                    $replaceElement[] = '[[MR:' . $elementDB->id . ']]';
+                        $elementDB = DB_ORM::model('map_element')->saveElement($map->id, $values);
+                        $elements[$id]['database_id'] = $elementDB->id;
+                        $findElement[] = '[[MR:' . $id . ']]';
+                        $replaceElement[] = '[[MR:' . $elementDB->id . ']]';
+                    }
                 }
             }
         }

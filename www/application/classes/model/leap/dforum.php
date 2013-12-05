@@ -162,7 +162,7 @@ class Model_Leap_DForum extends DB_ORM_Model {
         $connection = DB_Connection_Pool::instance()->get_connection('default');
         $result = $connection->query("
             SELECT
-              forum. * , u.nickname AS author_name,
+              forum.* , u.nickname AS author_name,
               COUNT( DISTINCT(dmes.id) ) AS messages_count,
               lastm.id AS message_id,
               lastm.date AS message_date,
@@ -286,7 +286,7 @@ class Model_Leap_DForum extends DB_ORM_Model {
             ->join('LEFT', 'users', 'u')
             ->on('u.id', '=', 'messages.user_id')
             ->where('messages.forum_id','=',$forumId)
-            ->order_by('messages.id');
+            ->order_by('messages.id', 'DESC');
         $result = $builder->query();
 
         if($result->is_loaded()) {

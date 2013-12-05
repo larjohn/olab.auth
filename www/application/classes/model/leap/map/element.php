@@ -98,6 +98,12 @@ class Model_Leap_Map_Element extends DB_ORM_Model {
                 'nullable' => FALSE,
                 'savable' => TRUE,
             )),
+
+            'is_shared' => new DB_ORM_Field_Boolean($this, array(
+                'savable' => TRUE,
+                'nullable' => FALSE,
+                'default' => TRUE
+            ))
         );
         
         $this->relations = array(
@@ -106,6 +112,12 @@ class Model_Leap_Map_Element extends DB_ORM_Model {
                 'parent_key' => array('id'),
                 'parent_model' => 'map',
             )),
+
+            'metadata' => new DB_ORM_Relation_HasOne($this, array(
+                'child_key' => array('element_id'),
+                'parent_key' => array('id'),
+                'child_model' => 'map_element_metadata',
+            ))
         );
         
         $this->mimes[] = 'image/jpg';
@@ -225,7 +237,18 @@ class Model_Leap_Map_Element extends DB_ORM_Model {
         
         return NULL;
     }
-    
+
+    public function addFile($mapId, $values) {
+        return DB_ORM::insert('map_element')
+                       ->column('map_id', $mapId)
+                       ->column('name', Arr::get($values, 'name', ''))
+                       ->column('mime', Arr::get($values, 'mime', ''))
+                       ->column('path', Arr::get($values, 'path', ''))
+                       ->column('width', Arr::get($values, 'width', 0))
+                       ->column('height', Arr::get($values, 'height', 0))
+                       ->execute();
+    }
+
     public function uploadFile($mapId, $values) {
         if($values['filename']['size'] < 1024 * 3 * 1024) {
             if(is_uploaded_file($values['filename']['tmp_name'])) {
@@ -340,6 +363,9 @@ class Model_Leap_Map_Element extends DB_ORM_Model {
         $this->v_align = Arr::get($values, 'v', $this->v_align);
         $this->width_type = Arr::get($values, 'wv', $this->width_type);
         $this->height_type = Arr::get($values, 'hv', $this->height_type);
+        $this->is_shared = Arr::get($values, 'shared', false);
+
+        DB_ORM::model('map_element_metadata')->saveMetadata($this->id, $values);
         
         $this->save();
     }

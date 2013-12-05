@@ -24,6 +24,8 @@ defined('SYSPATH') or die('No direct script access.');
 class Controller_LabyrinthManager extends Controller_Base {
 
     public function before() {
+        $this->templateData['labyrinthSearch'] = 1;
+
         parent::before();
 
         Breadcrumbs::add(Breadcrumb::factory()->set_title(__('My Labyrinths'))->set_url(URL::base() . 'authoredLabyrinth'));
@@ -797,6 +799,11 @@ class Controller_LabyrinthManager extends Controller_Base {
         if ($mapId) {
 
             $this->templateData['map'] = DB_ORM::model('map', array($mapId));
+            if ($this->templateData['map']->verification != null){
+                $this->templateData['verification'] = json_decode($this->templateData['map']->verification, true);
+            } else {
+                $this->templateData['verification'] = array();
+            }
             $this->templateData['types'] = DB_ORM::model('map_type')->getAllTypes();
             $this->templateData['skins'] = DB_ORM::model('map_skin')->getAllSkins();
             $this->templateData['securities'] = DB_ORM::model('map_security')->getAllSecurities();
@@ -804,6 +811,7 @@ class Controller_LabyrinthManager extends Controller_Base {
             $this->templateData['contributors'] = DB_ORM::model('map_contributor')->getAllContributors($mapId);
             $this->templateData['contributor_roles'] = DB_ORM::model('map_contributor_role')->getAllRoles();
             $this->templateData['linkStyles'] = DB_ORM::model('map_node_link_style')->getAllLinkStyles();
+            $this->templateData['files'] = DB_ORM::model('map_element')->getAllFilesByMap($mapId);
 
             Breadcrumbs::add(Breadcrumb::factory()->set_title($this->templateData['map']->name)->set_url(URL::base() . 'labyrinthManager/global/' . $mapId));
             Breadcrumbs::add(Breadcrumb::factory()->set_title(__('Details'))->set_url(URL::base() . 'labyrinthManager/global/id/' . $mapId));
@@ -843,6 +851,43 @@ class Controller_LabyrinthManager extends Controller_Base {
         }
     }
 
+    public function action_addNewForum() {
+        $mapId       = $this->request->param('id', null);
+        $redirectURL = URL::base();
+
+        if($mapId != null) {
+            $message = Arr::get($_POST, 'firstForumMessage', '');
+            $map     = DB_ORM::model('map', array((int)$mapId));
+            if($map != null) {
+                $forum = DB_ORM::model('dforum')->createForum($map->name, 1, 1);
+                $messageID = DB_ORM::model('dforum_messages')->createMessage($forum, $message);
+                DB_ORM::model('dforum_users')->updateUsers($forum, array(Auth::instance()->get_user()->id), 1);
+
+                DB_ORM::model('map')->updateMapForumAssign($mapId, $forum);
+
+                $redirectURL .= 'labyrinthManager/global/' . $mapId;
+            }
+        }
+
+        Request::initial()->redirect($redirectURL);
+    }
+
+    public function action_unassignForum() {
+        $mapId       = $this->request->param('id', null);
+        $redirectURL = URL::base();
+
+        if($mapId != null) {
+            $map = DB_ORM::model('map', array((int)$mapId));
+            if($map != null) {
+                DB_ORM::model('map')->updateMapForumAssign($mapId, null);
+
+                $redirectURL .= 'labyrinthManager/global/' . $mapId;
+            }
+        }
+
+        Request::initial()->redirect($redirectURL);
+    }
+
     public function action_deleteContributor() {
         $mapId = (int) $this->request->param('id', 0);
         $contId = (int) $this->request->param('id2', 0);
@@ -879,6 +924,33 @@ class Controller_LabyrinthManager extends Controller_Base {
                     unset($_POST['reminder_minutes']);
                     $_POST['reminder_time'] = $reminder_time;
                 }
+
+
+                // Prepare to save verified data
+                if (count($_POST['verification']) > 0) {
+                    foreach($_POST['verification'] as $key => $value){
+                        if (isset($_POST[$key])){
+                            if ($_POST[$key] == 1){
+                                $_POST['verification'][$key] = strtotime($_POST['verification'][$key]);
+                            } else {
+                                $_POST['verification'][$key] = null;
+                            }
+                        } else {
+                            $_POST['verification'][$key] = null;
+                        }
+                    }
+                }
+                if (isset($_POST['inst_guide']) && isset($_POST['inst_guide_select'])){
+                    if ($_POST['inst_guide'] == 1){
+                        $_POST['verification']['inst_guide'] = $_POST['inst_guide_select'];
+                    } else {
+                        $_POST['verification']['inst_guide'] = null;
+                    }
+                } else {
+                    $_POST['verification']['inst_guide'] = null;
+                }
+                $_POST['verification'] = json_encode($_POST['verification']);
+
                 DB_ORM::model('map')->updateMap($mapId, $_POST);
                 DB_ORM::model('map_contributor')->updateContributors($mapId, $_POST);
 
@@ -991,5 +1063,49 @@ class Controller_LabyrinthManager extends Controller_Base {
         } else {
             Request::initial()->redirect(URL::base() . 'openLabyrinth');
         }
+    }
+
+    public function action_search() {
+        $mapId = $this->request->param('id', null);
+        $searchText = Arr::get($_GET, 's', null);
+
+        $searcher = new Searcher();
+
+        $searcher->addElement(new Searcher_Element_BasicMap_Dam($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                              array('field' => 'name', 'label' => 'Name'))));
+        $searcher->addElement(new Searcher_Element_BasicMap_Node($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                               array('field' => 'title', 'label' => 'Title'),
+                                                                               array('field' => 'text', 'label' => 'Content'))));
+        $searcher->addElement(new Searcher_Element_BasicMap_NodeSection($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                                      array('field' => 'name', 'label' => 'Name'))));
+        $searcher->addElement(new Searcher_Element_BasicMap_Counter($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                                  array('field' => 'name', 'label' => 'Name'),
+                                                                                  array('field' => 'description', 'label' => 'Description'),
+                                                                                  array('field' => 'start_value', 'label' => 'Start value'))));
+        $searcher->addElement(new Searcher_Element_Question($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                          array('field' => 'stem', 'label' => 'Stem'),
+                                                                          array('field' => 'response', 'label' => 'Response', 'type' => 'response'),
+                                                                          array('field' => 'feedback', 'label' => 'Feedback', 'type' => 'response'))));
+        $searcher->addElement(new Searcher_Element_Chat($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                      array('field' => 'stem', 'label' => 'Stem'),
+                                                                      array('field' => 'question', 'label' => 'Question', 'type' => 'element'),
+                                                                      array('field' => 'response', 'label' => 'Response', 'type' => 'element'))));
+        $searcher->addElement(new Searcher_Element_Vpd($mapId, array(array('field' => 'id', 'label' => 'Id'),
+                                                                     array('field' => 'value', 'label' => 'Value', 'type' => 'element'))));
+
+        $this->templateData['searchText'] = $searchText;
+
+        $this->templateData['map'] = DB_ORM::model('map', array((int) $mapId));
+        $leftView = View::factory('labyrinth/labyrinthEditorMenu');
+        $leftView->set('templateData', $this->templateData);
+
+        $view = View::factory('labyrinthSearchResult');
+        $view->set('data', $searcher->search($searchText));
+        $view->set('searchText', $searchText);
+
+        $this->templateData['center'] = $view;
+        $this->templateData['left'] = $leftView;
+        unset($this->templateData['right']);
+        $this->template->set('templateData', $this->templateData);
     }
 }

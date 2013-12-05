@@ -19,10 +19,31 @@
  *
  */
 ?>
-<script type="text/javascript" src="<?php echo URL::base(); ?>scripts/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-
+<script language="javascript" type="text/javascript"
+        src="<?php echo URL::base(); ?>scripts/tinymce/js/tinymce/tinymce.min.js"></script>
 <script language="javascript" type="text/javascript">
-    tinyMCE.init({
+    tinymce.init({
+        selector: "textarea",
+        theme: "modern",
+        content_css: "<?php echo URL::base(); ?>scripts/tinymce/js/tinymce/plugins/rdface/css/rdface.css,<?php echo URL::base(); ?>scripts/tinymce/js/tinymce/plugins/rdface/schema_creator/schema_colors.css",
+        entity_encoding: "raw",
+        contextmenu: "link image inserttable | cell row column rdfaceMain",
+        closed: /^(br|hr|input|meta|img|link|param|area|source)$/,
+        valid_elements : "+*[*]",
+        plugins: ["compat3x",
+            "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+            "searchreplace wordcount visualblocks visualchars code fullscreen",
+            "insertdatetime media nonbreaking save table contextmenu directionality",
+            "emoticons template paste textcolor layer advtextcolor rdface imgmap"
+        ],
+        toolbar1: "insertfile undo redo | styleselect | bold italic | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
+        toolbar2: " link image imgmap|print preview media | forecolor backcolor emoticons ltr rtl layer restoredraft | rdfaceMain",
+        image_advtab: true,
+        templates: [
+
+        ]
+    });
+    /*tinyMCE.init({
         // General options
         mode: "textareas",
         document_base_url : "<?php echo URL::base(true); ?>",
@@ -40,12 +61,13 @@
         theme_advanced_statusbar_location: "bottom",
         theme_advanced_resizing: true,
         editor_selector: "mceEditor"
-    });
+    });*/
 </script>
 
 <div class="page-header">
+    <h1><?php echo __($templateData['forum']['name']); ?></h1>
+</div>
 
-    <h1><?php echo __($templateData['forum']['name']); ?></h1></div>
 
 
     <?php if (isset($templateData['topics'])) {
@@ -57,6 +79,29 @@
         <?php }
         echo '</ul><br />';
     } ?>
+
+                    <form class="form-horizontal" id="form1" name="form1" method="post"
+                          action="<?php echo URL::base() . 'dforumManager/addMessage/'; ?>">
+                        <fieldset class="fieldset">
+                            <div class="control-group">
+                                <label for="message" class="control-label"><?php echo __('Message: '); ?></label>
+
+                                <div class="controls">
+                                    <textarea name="message" id="message" class="mceEditor"></textarea>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-actions">
+                                <div class="pull-right">
+                                    <input class="btn btn-large btn-primary" type="submit" name="Submit"
+                                           value="<?php echo __('Add message'); ?>" onclick="return CheckForm();">
+                                </div>
+                        </div>
+                        <input type="hidden" name="forum" id="forum" value="<?php echo $templateData['forum']['id']; ?>" />
+                        <input type="hidden" id="lastMessageId" value="<?php echo (isset($message['id'])) ? $message['id'] : null; ?>" />
+                        <input type="hidden" id="url" value="<?php echo URL::base(); ?>" />
+                    </form>
 
 <table class="table table-striped table-bordered" id="message-table">
     <tbody>
@@ -99,31 +144,6 @@
     <?php } ?>
     </tbody>
 </table>
-
-<form class="form-horizontal" id="form1" name="form1" method="post"
-      action="<?php echo URL::base() . 'dforumManager/addMessage/'; ?>">
-    <fieldset class="fieldset">
-        <div class="control-group">
-            <label for="message" class="control-label"><?php echo __('Message: '); ?></label>
-
-            <div class="controls">
-                <textarea name="message" id="message" class="mceEditor"></textarea>
-            </div>
-        </div>
-    </fieldset>
-
-    <div class="form-actions">
-        <div class="form-actions">
-            <div class="pull-right">
-                <input class="btn btn-large btn-primary" type="submit" name="Submit"
-                       value="<?php echo __('Add message'); ?>" onclick="return CheckForm();"></div>
-        </div>
-    </div>
-    <input type="hidden" name="forum" id="forum" value="<?php echo $templateData['forum']['id']; ?>" />
-    <input type="hidden" id="lastMessageId" value="<?php echo (isset($message['id'])) ? $message['id'] : null; ?>" />
-    <input type="hidden" id="url" value="<?php echo URL::base(); ?>" />
-</form>
-
 
 <script>
 

@@ -156,6 +156,14 @@ class Model_Leap_Map extends DB_ORM_Model
                 'nullable' => TRUE,
                 'default' => 0,
             )),
+            'verification' => new DB_ORM_Field_Text($this, array(
+                'savable' => TRUE,
+            )),
+            'assign_forum_id' => new DB_ORM_Field_Integer($this, array(
+                'max_length' => 11,
+                'nullable' => TRUE,
+                'savable' => TRUE
+            ))
         );
 
         $this->relations = array(
@@ -193,6 +201,7 @@ class Model_Leap_Map extends DB_ORM_Model
                 'child_key' => array('map_id'),
                 'child_model' => 'map_contributor',
                 'parent_key' => array('id'),
+                'options' => array(array('order_by', array('map_contributors.order', 'ASC')))
             )),
             'authors' => new DB_ORM_Relation_HasMany($this, array(
                 'child_key' => array('map_id'),
@@ -501,6 +510,12 @@ class Model_Leap_Map extends DB_ORM_Model
         $this->section_id = Arr::get($values, 'section', 1);
         $this->language_id = Arr::get($values, 'language_id', 1);
 
+        $forum = DB_ORM::model('dforum')->createForum(Arr::get($values, 'title', 'empty_title'), 1, 1);
+        $messageID = DB_ORM::model('dforum_messages')->createMessage($forum, '');
+        DB_ORM::model('dforum_users')->updateUsers($forum, array($this->author_id), 1);
+
+        $this->assign_forum_id = $forum;
+
         $this->save();
 
         $map = $this->getMapByName($this->name);
@@ -509,6 +524,14 @@ class Model_Leap_Map extends DB_ORM_Model
         }
 
         return $map;
+    }
+
+    public function updateMapForumAssign($mapId, $newForumId) {
+        DB_SQL::update('default')
+                ->table($this->table())
+                ->set('assign_forum_id', $newForumId)
+                ->where('id', '=', $mapId)
+                ->execute();
     }
 
     public function createVUEMap($title, $authorId)
@@ -581,6 +604,7 @@ class Model_Leap_Map extends DB_ORM_Model
         $this->reminder_time = Arr::get($values, 'reminder_time', 0);
         $this->security_id = Arr::get($values, 'security', 2);
         $this->section_id = Arr::get($values, 'section', 1);
+        $this->verification = Arr::get($values, 'verification', NULL);
 
         $this->save();
     }
@@ -727,7 +751,8 @@ class Model_Leap_Map extends DB_ORM_Model
             ->column('feedback', $this->feedback)
             ->column('dev_notes', $this->dev_notes)
             ->column('source', $this->source)
-            ->column('source_id', $this->source_id);
+            ->column('source_id', $this->source_id)
+            ->column('verification', $this->verification);
 
         $newMapId = $builder->execute();
         $nodeMap = DB_ORM::model('map_node')->duplicateNodes($mapId, $newMapId);

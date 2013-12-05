@@ -23,7 +23,18 @@ defined('SYSPATH') or die('No direct script access.');
 
 class Controller_FileManager extends Controller_Base {
 
+    private $metadataJPEGFields = array(array('key' => 'Artist', 'title' => 'Artist'),
+                                        array('key' => 'Company', 'title' => 'Company'),
+                                        array('key' => 'Make', 'title' => 'Make'),
+                                        array('key' => 'Model', 'title' => 'Model'),
+                                        array('key' => 'DateTimeOriginal', 'title' => 'Original date time'),
+                                        array('key' => 'DateTimeDigitized', 'title' => 'Digitized date time'),
+                                        array('key' => 'Software', 'title' => 'Software'),
+                                        array('key' => 'DateTime', 'title' => 'Date time'));
+
     public function before() {
+        $this->templateData['labyrinthSearch'] = 1;
+
         parent::before();
 
         Breadcrumbs::add(Breadcrumb::factory()->set_title(__('My Labyrinths'))->set_url(URL::base() . 'authoredLabyrinth'));
@@ -69,6 +80,45 @@ class Controller_FileManager extends Controller_Base {
         }
     }
 
+    public function action_replaceFiles() {
+        set_time_limit(0);
+        $this->auto_render = false;
+
+        $mapId = Arr::get($_POST, 'mapId', null);
+        $fileName = Arr::get($_POST, 'fileName', null);
+
+        $result = '';
+        if($mapId != null && $fileName != null) {
+            $dir = DOCROOT . '/files/' . $mapId ;
+            if(!is_dir($dir)) {
+                mkdir(DOCROOT . '/files/' . $mapId);
+            }
+
+            $dest = DOCROOT . '/files/' . $mapId . '/' . $fileName;
+            $src  = DOCROOT . '/scripts/fileupload/php/files/' . $fileName;
+            if (getimagesize($src)) {
+                $src2 = DOCROOT . '/scripts/fileupload/php/thumbnails/' . $fileName;
+                unlink($src2);
+            }
+
+            $path = 'files/' . $mapId . '/' . $fileName;
+
+            $dataSave = array(
+                'name' => $fileName,
+                'path' => $path,
+            );
+
+            copy($src, $dest);
+            unlink($src);
+
+            DB_ORM::model('map_element')->saveElement($mapId,$dataSave);
+
+            $result = $fileName;
+        }
+
+        echo $result;
+    }
+
     public function action_deleteFile() {
         $mapId = $this->request->param('id', NULL);
         $fileId = $this->request->param('id2', NULL);
@@ -80,12 +130,72 @@ class Controller_FileManager extends Controller_Base {
         }
     }
 
+    public function action_saveByUrl(){
+        $mapId = $this->request->param('id', NULL);
+        $url = Arr::get($this->request->post(), 'url', NULL);
+        $meta_values['originURL'] = $url;
+
+        if (($url != NULL) && ($url != '')){
+            $url_info = pathinfo ($url);
+            if(isset($url_info['basename'])){
+                $name = $url_info['basename'];
+
+                $path = DOCROOT . '/files/'.$mapId.'/';
+                if (file_exists($path.$name)){
+                    $name = uniqid().'_'.$name;
+                }
+
+                $img = file_get_contents($url, FILE_USE_INCLUDE_PATH);
+                file_put_contents($path.$name, $img);
+
+                $values['path'] = 'files/'.$mapId.'/'.$name;
+                $values['name'] = $name;
+                $obj = DB_ORM::model('map_element')->saveElement($mapId, $values);
+                DB_ORM::model('map_element_metadata')->saveMetadata($obj->id, $meta_values);
+            }
+        }
+
+        Request::initial()->redirect(URL::base().'fileManager/index/'.$mapId);
+    }
+
+    private function getArrayValueByKey($needle, $haystack) {
+        if(array_key_exists($needle, $haystack)) { return array(true, $haystack[$needle]); }
+
+        foreach($haystack as $v) {
+            $k = false;
+            $r = null;
+            if(is_array($v)) {
+                list($k, $r) = $this->getArrayValueByKey($needle, $v);
+            }
+
+            if($k) { return array(true, $r); }
+        }
+
+        return array(false, null);
+    }
+
     public function action_editFile() {
         $mapId = $this->request->param('id', NULL);
         $fileId = $this->request->param('id2', NULL);
         if ($mapId != NULL and $fileId != NULL) {
             $this->templateData['map'] = DB_ORM::model('map', array((int) $mapId));
             $this->templateData['file'] = DB_ORM::model('map_element', array((int) $fileId));
+
+            $extensionExist = extension_loaded('exif');
+            if($extensionExist && isset($this->templateData['file']) && $this->templateData['file']->mime == 'image/jpeg') {
+                $jpegInfo     = exif_read_data(DOCROOT . $this->templateData['file']->path, 0, true);
+                $jpegMetadata = array();
+                foreach($this->metadataJPEGFields as $metadataField) {
+                    list($exist, $value) = $this->getArrayValueByKey($metadataField['key'], $jpegInfo);
+                    if($exist) {
+                        $jpegMetadata[] = array('title' => $metadataField['title'], 'value' => $value);
+                    }
+                }
+
+                $this->templateData['fileMetadata'] = $jpegMetadata;
+            } else if(!$extensionExist) {
+                $this->templateData['enableModule'] = true;
+            }
 
             Breadcrumbs::add(Breadcrumb::factory()->set_title($this->templateData['map']->name)->set_url(URL::base() . 'labyrinthManager/global/' . $mapId));
             Breadcrumbs::add(Breadcrumb::factory()->set_title(__('Files'))->set_url(URL::base() . 'fileManager/index/' . $mapId));

@@ -48,10 +48,6 @@
         <link rel="stylesheet" href="<?php echo URL::base(); ?>scripts/browser/css/BrowserUpdateWarning.css" type="text/css" />
         
         <link rel="shortcut icon" href="<?php echo URL::base(); ?>images/ico/favicon.ico" />
-        <link rel="apple-touch-icon-precomposed" href="<?php echo URL::base(); ?>images/ico/apple-touch-icon-57-precomposed.png" />
-        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="<?php echo URL::base(); ?>images/ico/apple-touch-icon-72-precomposed.png" />
-        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo URL::base(); ?>images/ico/apple-touch-icon-114-precomposed.png" />
-        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo URL::base(); ?>images/ico/apple-touch-icon-144-precomposed.png" />
         <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/jquery-1.7.2.min.js"></script>
     </head>
     <body>
@@ -174,6 +170,14 @@
                 if (Auth::instance()->logged_in()) {
                     ?>
                     <div id="sidebar" class="span2">
+                        <?php if(isset($templateData['labyrinthSearch']) && isset($templateData['map'])) { ?>
+                            <form action="<?php echo URL::base(); ?>labyrinthManager/search<?php echo '/' . (isset($templateData['map']) && !is_numeric($templateData['map'])  ? $templateData['map']->id : $templateData['map']); ?>" method="get">
+                                <div class="input-prepend">
+                                    <span class="add-on"><i class="icon-search"></i></span>
+                                    <input class="span10" id="searchText" name="s" type="text" value="<?php if(isset($templateData['searchText'])) echo $templateData['searchText']; ?>" placeholder="Labyrinth Search">
+                                </div>
+                            </form>
+                        <?php } else { ?>
                             <form action="<?php echo URL::base(); ?>home/search" method="post">
                                 <input type="hidden" name="scope" value="t" />
                                 <div class="input-prepend">
@@ -181,6 +185,7 @@
                                     <input class="span10" id="searchterm" name="searchterm" type="text" placeholder="Labyrinth Search">
                                 </div>
                             </form>
+                        <?php } ?>
 
                         <div class="sidebar-nav">
                             <?php if (isset($templateData['left'])) echo $templateData['left']; ?>
@@ -224,11 +229,11 @@
         </div>
         <input type="hidden" id="browserWarningImages" value="<?php echo URL::base(); ?>scripts/browser/images/"/>
 
-        <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/jquery-ui-1.9.1.custom.min.js"></script>
-        <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/jquery.cookie.js"></script>
-        <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/browser/js/BrowserUpdateWarning_jQuery.js"></script>
-        <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/application.js"></script>
-        <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/bootstrap/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="<?php echo URL::base(); ?>scripts/datepicker/js/bootstrap-datepicker.js"></script>
+        <script type="text/javascript" src="<?php echo ScriptVersions::get(URL::base().'scripts/jquery-ui-1.9.1.custom.min.js'); ?>"></script>
+        <script type="text/javascript" src="<?php echo ScriptVersions::get(URL::base().'scripts/jquery.cookie.js'); ?>"></script>
+        <script type="text/javascript" src="<?php echo ScriptVersions::get(URL::base().'scripts/browser/js/BrowserUpdateWarning_jQuery.js'); ?>"></script>
+        <script type="text/javascript" src="<?php echo ScriptVersions::get(URL::base().'scripts/application.js'); ?>"></script>
+        <script type="text/javascript" src="<?php echo ScriptVersions::get(URL::base().'scripts/bootstrap/js/bootstrap.min.js'); ?>"></script>
+        <script type="text/javascript" src="<?php echo ScriptVersions::get(URL::base().'scripts/datepicker/js/bootstrap-datepicker.js'); ?>"></script>
     </body>
 </html>

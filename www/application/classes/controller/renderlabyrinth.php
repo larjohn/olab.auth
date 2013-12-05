@@ -47,8 +47,10 @@ class Controller_RenderLabyrinth extends Controller_Template {
             }
             if ($continue) {
                 Session::instance()->delete('questionChoices');
+                Session::instance()->delete('dragQuestionResponses');
                 Session::instance()->delete('counterFunc');
                 Session::instance()->delete('stopCommonRules');
+                Session::instance()->delete('shownMapPopups');
                 $rootNode = DB_ORM::model('map_node')->getRootNodeByMap((int) $mapId);
 
                 if ($rootNode != NULL) {
@@ -98,7 +100,7 @@ class Controller_RenderLabyrinth extends Controller_Template {
                             $data['skin_path'] = NULL;
                         }
                         $data['session'] = (int)$data['traces'][0]->session_id;
-                        $data['messages_labyrinth'] = DB_ORM::model('map_popup')->getEnabledLabyrinthMessageByMap($mapId);
+                        $data['map_popups'] = DB_ORM::model('map_popup')->getEnabledMapPopups($mapId);
 
                         $this->template = View::factory('labyrinth/skin/basic/basic');
                         $this->template->set('templateData', $data);
@@ -229,7 +231,7 @@ class Controller_RenderLabyrinth extends Controller_Template {
                     $data['timer_start'] = 1;
 
                     $data['popup_start'] = 1;
-                    $data['messages_labyrinth'] = DB_ORM::model('map_popup')->getEnabledLabyrinthMessageByMap($mapId);
+                    $data['map_popups'] = DB_ORM::model('map_popup')->getEnabledMapPopups($mapId);
 
                     $this->template = View::factory('labyrinth/skin/basic/basic');
                     $this->template->set('templateData', $data);
@@ -499,6 +501,71 @@ class Controller_RenderLabyrinth extends Controller_Template {
         Request::initial()->redirect(URL::base() . 'renderLabyrinth/index/' . $mapId);
     }
 
+    public function action_ajaxDraggingQuestionResponse() {
+        $this->auto_render = false;
+        $questionId    = Arr::get($_POST, 'questionId', null);
+        $responsesJSON = Arr::get($_POST, 'responsesJSON', null);
+
+        if($questionId != null && $questionId > 0) {
+            $prevResponses = Session::instance()->get('dragQuestionResponses');
+            if($prevResponses == null) { $prevResponses = array(); }
+
+            $isNew = true;
+            if(count($prevResponses) > 0) {
+                foreach($prevResponses as $key => $response) {
+                    $object = json_decode($response, true);
+                    if($object != null && isset($object['id'])) {
+                        if((int)$object['id'] == (int)$questionId) {
+                            $prevResponses[$key] = '{"id": ' . $questionId . ', "responses": ' . $responsesJSON . '}';
+                            $isNew = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if($isNew) {
+                $prevResponses[] = '{"id": ' . $questionId . ', "responses": ' . $responsesJSON . '}';
+            }
+
+            Session::instance()->set('dragQuestionResponses', $prevResponses);
+        }
+    }
+
+    public function action_downloadFile() {
+        $fileId = $this->request->param('id', null);
+
+        if($fileId != null) {
+            $file = DB_ORM::model('map_element', array((int)$fileId));
+            $filename = DOCROOT . $file->path; // of course find the exact filename....
+            header('Pragma: public');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Cache-Control: private', false); // required for certain browsers
+            header('Content-Type: ' . $file->mime);
+
+            header('Content-Disposition: attachment; filename="'. basename($filename) . '";');
+            header('Content-Transfer-Encoding: binary');
+            header('Content-Length: ' . filesize($filename));
+
+            readfile($filename);
+
+            exit;
+        }
+    }
+
+    public function action_shownPopup() {
+        $this->auto_render = false;
+        $popupId = Arr::get($_POST, 'popupId', null);
+        $shownPopups = Session::instance()->get('shownMapPopups', array());
+
+        if($popupId != null && !in_array($popupId, $shownPopups)) {
+            $shownPopups[] = $popupId;
+        }
+
+        Session::instance()->set('shownMapPopups', $shownPopups);
+    }
+
     private function checkRemoteUser($username, $password) {
         $username = Model::factory('utilites')->deHash($username);
         $password = Model::factory('utilites')->deHash($password);
@@ -671,8 +738,10 @@ class Controller_RenderLabyrinth extends Controller_Template {
                                             $replaceString = Controller_RenderLabyrinth::getSwfHTML($id);
                                         } elseif (strstr($media->mime, 'audio')) {
                                             $replaceString = Controller_RenderLabyrinth::getAudioHTML($id);
-                                        } else {
+                                        } else if(in_array($media->mime, array('image/jpg', 'image/jpeg', 'image/gif', 'image/png'))) {
                                             $replaceString = Controller_RenderLabyrinth::getImageHTML($id);
+                                        } else {
+                                            $replaceString = Controller_RenderLabyrinth::getFileLink($id);
                                         }
                                         break;
                                     case 'AV':
@@ -721,6 +790,15 @@ class Controller_RenderLabyrinth extends Controller_Template {
         $image = DB_ORM::model('map_element', array((int) $id));
         if ($image) {
             return '<img src="' . URL::base() . $image->path . '">';
+        }
+
+        return '';
+    }
+
+    private static function getFileLink($id) {
+        $file = DB_ORM::model('map_element', array((int) $id));
+        if ($file) {
+            return '<a class="file-link" href="' . URL::base() . 'renderlabyrinth/downloadFile/' . $file->id . '">' . $file->name . '</a>';
         }
 
         return '';
@@ -918,6 +996,12 @@ class Controller_RenderLabyrinth extends Controller_Template {
                                         </div>';
                         }
                 }
+            } else if($question->type->value == 'dd') {
+                $result .= '<ul class="drag-question-container" questionId="' . $question->id . '">';
+                foreach ($question->responses as $response) {
+                    $result .= '<li class="sortable" responseId="' . $response->id . '">' . $response->response . '</li>';
+                }
+                $result .= '</ul>';
             }
 
             $result = '<table bgcolor="#eeeeee" width="100%"><tr><td><p>' . $question->stem . '</p>' . $result . '</td></tr></table>';

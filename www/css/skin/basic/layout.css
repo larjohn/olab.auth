@@ -441,8 +441,61 @@ button.close {
 .annotation {
     background-color: #fcf8e3;
     padding: 5px;
-    border: 1px solid #fbeed5;
+    border: 1px solid #000000;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
+    margin-top:5px;
+    margin-bottom:5px;
+}
+.drag-question-container {
+    margin: 5px 5px 5px 0px;
+    list-style: none;
+    padding: 0;
+}
+.drag-question-container > li {
+    padding: 5px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    border: 1px solid #b0b0b0;
+    background-color: #eeeeee;
+}
+a.file-link,
+a.file-link:visited {
+    color: #0088cc;
+}
+.popup-inside-container {
+    position: relative;
+}
+.popup-outside-container {
+    position: relative;
+}
+.popup {
+    z-index: 1800;
+    max-width: 350px;
+    text-align: justify;
+    padding: 5px 10px;
+    position: absolute;
+}
+.popup.top {
+    top: 0;
+}
+.popup.left {
+    left: 0;
+}
+.popup.right {
+    right: 0;
+}
+.popup.bottom {
+    bottom: 0;
+}
+.popup.hide {
+    display: none;
+}
+.popup .header {
+    text-align: center;
+    font-size: 18px;
 }

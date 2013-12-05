@@ -30,15 +30,14 @@ class Model_Leap_Map_Popup_Position extends DB_ORM_Model {
 
         $this->fields = array(
             'id' => new DB_ORM_Field_Integer($this, array(
-                'max_length' => 2,
-                'nullable' => FALSE,
-                'unsigned' => TRUE,
+                'max_length' => 11,
+                'nullable' => FALSE
             )),
             
-            'name' => new DB_ORM_Field_String($this, array(
-                'max_length' => 30,
+            'title' => new DB_ORM_Field_String($this, array(
+                'max_length' => 200,
                 'nullable' => FALSE,
-                'savable' => TRUE,
+                'savable' => FALSE,
             ))
         );
     }
@@ -48,34 +47,26 @@ class Model_Leap_Map_Popup_Position extends DB_ORM_Model {
     }
 
     public static function table() {
-        return 'map_popup_position';
+        return 'map_popup_positions';
     }
 
     public static function primary_key() {
         return array('id');
     }
-    
-    public function getAllPositionsId() {
-        $builder = DB_SQL::select('default')->from($this->table())->column('id');
-        $result = $builder->query();
-        
-        
-        $ids = array();
-        if ($result->is_loaded()) {
-            foreach ($result as $record) {
-                $ids[] = (int)$record['id'];
-            }
-        }
 
-        return $ids;
-    }
-    
-    public function getAllPositions() {
-        $result = array();
-        $ids = $this->getAllPositionsId();
-        
-        foreach($ids as $id) {
-            $result[] = DB_ORM::model($this->table(), array($id));
+    /**
+     * Get all popup positions
+     *
+     * @return array - array of all positions
+     */
+    public function getAll() {
+        $records = DB_SQL::select('default')->from($this->table())->column('id')->query();
+        $result  = array();
+
+        if($records->is_loaded()) {
+            foreach($records as $record) {
+                $result[] = DB_ORM::model('map_popup_position', array((int)$record['id']));
+            }
         }
 
         return $result;

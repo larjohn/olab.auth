@@ -45,8 +45,12 @@ class Model_Labyrinth extends Model {
 
             $result['node_title'] = $node->title;
             $result['node_text'] = $node->text;
-            $result['node_annotation'] = $node->annotation;
-				
+
+            $clearAnnotation = strip_tags($node->annotation, '<img>');
+            if ($this->checkUser($node->map_id, true) & (strlen($clearAnnotation) > 0)) {
+                $result['node_annotation'] = $node->annotation;
+            }
+
             $sessionId = NULL;
             if($bookmark != NULL) {
                 $b = DB_ORM::model('user_bookmark', array((int)$bookmark));
@@ -133,20 +137,26 @@ class Model_Labyrinth extends Model {
         return $result;
     }
 
-    private function checkUser($mapId) {
+    private function checkUser($mapId, $allowReviewers = false) {
         if (Auth::instance()->logged_in()) {
-            $map = DB_ORM::model('map', array((int) $mapId));
-            if (DB_ORM::model('map_user')->checkUserById($mapId, Auth::instance()->get_user()->id) && !$map->locked) {
-                return TRUE;
-            }
-
-
-            if ($map) {
-                if ($map->author_id == Auth::instance()->get_user()->id && !$map->locked) {
+            if (Auth::instance()->get_user()->type->name != 'learner'){
+                $map = DB_ORM::model('map', array((int) $mapId));
+                if (DB_ORM::model('map_user')->checkUserById($mapId, Auth::instance()->get_user()->id)&& !$map->locked) {
                     return TRUE;
+                }
+                if ($map) {
+                    if ($map->author_id == Auth::instance()->get_user()->id) {
+                        return TRUE;
+                    }
                 }
                 if(Auth::instance()->get_user()->type->name == 'superuser')
                     return TRUE;
+
+                if ($allowReviewers){
+                    if(Auth::instance()->get_user()->type->name == 'reviewer') {
+                        return TRUE;
+                    }
+                }
             }
 
             return FALSE;
@@ -347,6 +357,20 @@ class Model_Labyrinth extends Model {
                     }
                 }
             }
+        }
+
+        $draggingQuestionResponses = Session::instance()->get('dragQuestionResponses');
+        if($draggingQuestionResponses != null && count($draggingQuestionResponses) > 0) {
+            foreach($draggingQuestionResponses as $responseJSON) {
+                $responseObject = json_decode($responseJSON, true);
+                if($responseObject == null) continue;
+
+                if(isset($responseObject['id']) && isset($responseObject['responses'])) {
+                    DB_ORM::model('user_response')->createResponse($sessionId, $responseObject['id'], json_encode($responseObject['responses']), $nodeId);
+                }
+            }
+
+            Session::instance()->delete('dragQuestionResponses');
         }
 
         $this->updateCounterString($mapID, $counterString);
@@ -783,9 +807,13 @@ class Model_Labyrinth extends Model {
                                                 DB_ORM::model('user_sessionTrace')->updateCounter($sessionId, $rootNode->map_id, $rootNode->id, $counterStr);
                                                 return $element->response;
                                             }
+                                        } else {
+                                            return $element->response;
                                         }
                                     }
                                 }
+                            } else {
+                                return $element->response;
                             }
                         } else {
 							return $element->response;

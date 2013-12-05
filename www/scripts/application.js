@@ -29,7 +29,7 @@ jQuery(document).ready(function(){
         buttons: {
             "I agree": function() {
                 jQuery(this).dialog( "close" );
-                jQuery('#upload-form').submit();
+                jQuery('#uploadBtn').click();
             },
             Cancel: function() {
                 jQuery(this).dialog( "close" );
@@ -228,7 +228,7 @@ jQuery(document).ready(function(){
         $(this).select();
     });
 
-    $('[data-toggle=tooltip]').tooltip({placement:"top"});
+    $('[data-toggle=tooltip]').tooltip({placement:"left"});
 
 
     jQuery('#nodeCountContainer button').click(function() {
@@ -345,5 +345,42 @@ jQuery(document).ready(function(){
                 clearTimeout(rootAlertTimeout);
             }
         }
+    });
+
+    $('.fieldset-verification .btn').click(function() {
+        var verification = $(this).parents('.controls').find('div.verification');
+        if ($(this).attr('data-value') == 'yes'){
+            verification.removeClass('hide');
+        } else {
+            verification.addClass('hide');
+        }
+    });
+
+    $('.verification .date').datepicker();
+
+    jQuery('.contributors-list').sortable({
+        axis: "y",
+        cursor: "move",
+        stop: function(event, ui) {
+            recalculateContributorsOrder();
+        }
+    });
+
+    recalculateContributorsOrder();
+
+    function recalculateContributorsOrder() {
+        $('.contributors-list input[type="hidden"]').each(function(index, value) {
+            $(value).val(index + 1);
+        });
+    }
+
+    $('body').on('click', '#createNewForum', function() {
+        var url = $(this).attr('submit-url');
+        $('form').attr('action', url).submit();
+    });
+
+    $('body').on('click', '.unassign-forum', function() {
+        var url = $(this).attr('submit-url');
+        $('form').attr('action', url).submit();
     });
 });

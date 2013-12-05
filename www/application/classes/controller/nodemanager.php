@@ -24,6 +24,8 @@ defined('SYSPATH') or die('No direct script access.');
 class Controller_NodeManager extends Controller_Base {
 
     public function before() {
+        $this->templateData['labyrinthSearch'] = 1;
+
         parent::before();
 
         Breadcrumbs::add(Breadcrumb::factory()->set_title(__('My Labyrinths'))->set_url(URL::base() . 'authoredLabyrinth'));
@@ -51,6 +53,31 @@ class Controller_NodeManager extends Controller_Base {
         } else {
             Request::initial()->redirect(URL::base());
         }
+    }
+
+    public function action_addNodeNote() {
+        $node = DB_ORM::model('map_node', array((int)$this->request->param('id', null)));
+
+        $redirectURL = URL::base();
+
+        if($node != null && $node->map->assign_forum_id != null) {
+            $topicId = null;
+
+            if($node->notes != null && count($node->notes) == 1) {
+                $topicId = $node->notes[0]->id;
+            } else {
+                $topicId = DB_ORM::model('dtopic')->createTopic($node->title . ' - ' . $node->id, 0, 1, $node->map->assign_forum_id, $node->id);
+                $users   = DB_ORM::model('dforum_users')->getAllUsersInForum($node->map->assign_forum_id);
+                $groups  = DB_ORM::model('dforum_groups')->getAllGroupsInForum($node->map->assign_forum_id);
+
+                DB_ORM::model('dtopic_users')->updateUsers($topicId, $users);
+                DB_ORM::model('dtopic_groups')->updateGroups($topicId, $groups);
+            }
+
+            if($topicId != null) { $redirectURL .= 'dtopicManager/viewTopic/' . $topicId; }
+        }
+
+        Request::initial()->redirect($redirectURL);
     }
 
     public function action_addNode() {
